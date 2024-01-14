@@ -1,3 +1,16 @@
-<h1>Welcome to your library project</h1>
-<p>Create your package using @sveltejs/package and preview/showcase your work with SvelteKit</p>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+  import Preview, { type Scenarios } from "$lib/Preview.svelte";
+  import Mock from "./Mock.svelte";
+
+  const emits = ["click"];
+  const scenarios: Scenarios<Mock> = {
+    blue: {
+      props: { color: "blue" },
+    },
+    red: {
+      props: { color: "blue" },
+    },
+  };
+</script>
+
+<Preview component={Mock} {emits} {scenarios} />

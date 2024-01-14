@@ -1,0 +1,27 @@
+name: CI
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "21"
+      - name: Cache NPM
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: npm-${{ hashFiles('package-lock.json') }}-${{ hashFiles('patches/*.patch') }}
+      - name: Install
+        run: npm install
+      - name: Lint
+        run: npm run lint -- .
+      - name: Type-Checking
+        run: npm run check
