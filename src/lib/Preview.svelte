@@ -20,9 +20,9 @@
 
 <script lang="ts" generics="_C extends SvelteComponent">
   import { onMount, type ComponentType, type ComponentEvents } from "svelte";
-  import EventViewer from "$lib/EventViewer.svelte";
+  import EventViewer from "$lib/ScenarioEvents.svelte";
   import ScenarioEditor from "$lib/ScenarioEditor.svelte";
-  import Instance from "$lib/Instance.svelte";
+  import Instance from "$lib/ScenarioInstance.svelte";
 
   // _C is defined in the `generics` attribute of the `script` tag
   // but this is not recognized by eslint

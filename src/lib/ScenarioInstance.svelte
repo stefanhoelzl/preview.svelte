@@ -3,6 +3,7 @@
 
   import { type ComponentType, onMount, type SvelteComponent } from "svelte";
   import type { ScenarioState } from "$lib/Preview.svelte";
+  import Resizeable from "$lib/Resizeable.svelte";
 
   const dispatch = createEventDispatcher<{
     event: Event;
@@ -16,27 +17,12 @@
   onMount(() =>
     emits.forEach((e) => instance.$on(e, (event) => dispatch("event", event))),
   );
-
-  let resizeable: HTMLElement;
-  let observer: ResizeObserver;
-  onMount(() => {
-    observer = new ResizeObserver((entries) => {
-      entries.forEach((entry) => {
-        scenario.size.width = `${entry.contentRect.width.toFixed()}px`;
-        scenario.size.height = `${entry.contentRect.height.toFixed()}px`;
-      });
-      scenario = scenario;
-    });
-    observer.observe(resizeable);
-  });
 </script>
 
 <div class="container">
-  <div
-    class="resizeable"
-    style:height={scenario.size.height}
-    style:width={scenario.size.width}
-    bind:this={resizeable}
+  <Resizeable
+    bind:height={scenario.size.height}
+    bind:width={scenario.size.width}
   >
     <div
       class="instance"
@@ -54,20 +40,12 @@
         {/each}
       </svelte:component>
     </div>
-  </div>
+  </Resizeable>
 </div>
 
 <style>
   .container {
     overflow: hidden;
-  }
-
-  .resizeable {
-    resize: both;
-    overflow: auto;
-    border: 1px solid silver;
-    z-index: 1;
-    background-color: white;
   }
 
   .instance {
