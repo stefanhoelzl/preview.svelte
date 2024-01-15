@@ -1,15 +1,22 @@
 <script lang="ts" context="module">
   import { type ComponentProps, type SvelteComponent } from "svelte";
 
+  import ScenarioEditor from "$lib/ScenarioEditor.svelte";
+
   export type CSS = Record<string, string>;
 
-  type Scenario<C extends SvelteComponent> = {
+  type ScenarioSize = { width?: string; height?: string; children?: number };
+  export type Scenario<C extends SvelteComponent = SvelteComponent> = {
     props: ComponentProps<C>;
     css?: CSS;
-    size?: { width?: string; height?: string; children?: number };
+    size?: ScenarioSize;
   };
-  export type Scenarios<C extends SvelteComponent = SvelteComponent> = {
+  export type Scenarios<C extends SvelteComponent> = {
     [key: string]: Scenario<C>;
+  };
+
+  export type ScenarioState = Required<Scenario> & {
+    size: Required<ScenarioSize>;
   };
 </script>
 
@@ -29,7 +36,7 @@
   export let defaultCss: CSS = {};
   export let emits: Extract<keyof ComponentEvents<C>, string>[] = [];
 
-  let _scenarios = Object.fromEntries(
+  let _scenarios: Record<string, ScenarioState> = Object.fromEntries(
     Object.entries(scenarios).map(([k, d]) => [
       k,
       {
@@ -44,15 +51,6 @@
     ]),
   );
   let _events: Record<string, unknown[]> = {};
-
-  function update(key: string, raw: string) {
-    try {
-      _scenarios[key] = JSON.parse(raw);
-    } catch {
-      return;
-    }
-    _scenarios = _scenarios;
-  }
 
   let observer: ResizeObserver;
   onMount(() => {
@@ -149,11 +147,10 @@
             </div>
           </div>
         </div>
-        <textarea
-          class="props"
-          on:input={(e) => update(key, e.currentTarget.value)}
-          >{JSON.stringify(definition, null, 2)}</textarea
-        >
+        <ScenarioEditor
+          bind:scenario={definition}
+          on:edit={(e) => (_scenarios[key] = e.detail)}
+        />
         <div class="events">
           {#each (_events[key] || [])
             .map((e, idx) => [e, idx])
@@ -225,12 +222,6 @@
   .component {
     height: 100%;
     width: 100%;
-  }
-
-  .props {
-    font-family: monospace;
-    resize: none;
-    border: 1px solid silver;
   }
 
   .events {
