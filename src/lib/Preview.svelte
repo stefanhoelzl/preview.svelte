@@ -1,8 +1,6 @@
 <script lang="ts" context="module">
   import { type ComponentProps, type SvelteComponent } from "svelte";
 
-  import ScenarioEditor from "$lib/ScenarioEditor.svelte";
-
   export type CSS = Record<string, string>;
 
   type ScenarioSize = { width?: string; height?: string; children?: number };
@@ -23,13 +21,12 @@
 <script lang="ts" generics="_C extends SvelteComponent">
   import { onMount, type ComponentType, type ComponentEvents } from "svelte";
   import EventViewer from "$lib/EventViewer.svelte";
+  import ScenarioEditor from "$lib/ScenarioEditor.svelte";
+  import Instance from "$lib/Instance.svelte";
 
   // _C is defined in the `generics` attribute of the `script` tag
   // but this is not recognized by eslint
   type C = _C; // eslint-disable-line no-undef
-
-  let instances: Record<string, C> = {};
-  let resizeables: Record<string, HTMLElement> = {};
 
   export let component: ComponentType<C>;
   export let scenarios: Scenarios<C>;
@@ -51,22 +48,6 @@
     ]),
   );
 
-  let observer: ResizeObserver;
-  onMount(() => {
-    observer = new ResizeObserver((entries) => {
-      entries.forEach((entry) => {
-        const key = entry.target.closest(".scenario")?.id;
-        if (!key || entry.contentRect.width < 1 || entry.contentRect.width < 1)
-          return;
-        _scenarios[key]!.size.width = `${entry.contentRect.width.toFixed()}px`;
-        _scenarios[key]!.size.height =
-          `${entry.contentRect.height.toFixed()}px`;
-      });
-      _scenarios = _scenarios;
-    });
-    Object.values(resizeables).forEach((r) => observer.observe(r));
-  });
-
   let _events: Record<string, unknown[]> = {};
   function eventHandler(key: string, event: Event) {
     const eventObject: Record<string, unknown> = {};
@@ -80,14 +61,6 @@
     _events[key] = [..._events[key]!, eventObject];
     _events = _events;
   }
-
-  onMount(() => {
-    Object.entries(instances).forEach(([key, instance]) =>
-      emits.forEach((e) =>
-        instance.$on(e, (event) => eventHandler(key, event)),
-      ),
-    );
-  });
 
   onMount(() => {
     if (!window.location.hash)
@@ -105,31 +78,12 @@
     <div id={key} class="scenario">
       <a href="#{key}" class="nav">{key}</a>
       <div class="content">
-        <div class="parent">
-          <div
-            class="resizeable"
-            style:height={definition.size.height}
-            style:width={definition.size.width}
-            bind:this={resizeables[key]}
-          >
-            <div
-              class="component"
-              style={Object.entries(definition.css)
-                .map(([k, v]) => `${k}: ${v}`)
-                .join("; ")}
-            >
-              <svelte:component
-                this={component}
-                bind:this={instances[key]}
-                {...definition.props}
-              >
-                {#each Array(definition.size.children).fill(0) as _}
-                  <slot />
-                {/each}
-              </svelte:component>
-            </div>
-          </div>
-        </div>
+        <Instance
+          {component}
+          bind:scenario={_scenarios[key]}
+          {emits}
+          on:event={(e) => eventHandler(key, e.detail)}
+        />
         <ScenarioEditor
           bind:scenario={definition}
           on:edit={(e) => (_scenarios[key] = e.detail)}
@@ -182,23 +136,6 @@
   }
   .scenario:not(:target) > .content {
     display: none;
-  }
-
-  .parent {
-    overflow: hidden;
-  }
-
-  .resizeable {
-    resize: both;
-    overflow: auto;
-    border: 1px solid silver;
-    z-index: 1;
-    background-color: white;
-  }
-
-  .component {
-    height: 100%;
-    width: 100%;
   }
 
   .event-viewer {
