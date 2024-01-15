@@ -8,7 +8,7 @@
       props: { color: "blue" },
     },
     red: {
-      props: { color: "blue" },
+      props: { color: "red" },
     },
   };
 </script>
