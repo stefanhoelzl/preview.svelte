@@ -22,7 +22,7 @@
 
 <script lang="ts" generics="_C extends SvelteComponent">
   import { onMount, type ComponentType, type ComponentEvents } from "svelte";
-  import { cubicIn } from "svelte/easing";
+  import EventViewer from "$lib/EventViewer.svelte";
 
   // _C is defined in the `generics` attribute of the `script` tag
   // but this is not recognized by eslint
@@ -50,7 +50,6 @@
       },
     ]),
   );
-  let _events: Record<string, unknown[]> = {};
 
   let observer: ResizeObserver;
   onMount(() => {
@@ -68,6 +67,7 @@
     Object.values(resizeables).forEach((r) => observer.observe(r));
   });
 
+  let _events: Record<string, unknown[]> = {};
   function eventHandler(key: string, event: Event) {
     const eventObject: Record<string, unknown> = {};
     for (let prop in event) {
@@ -88,23 +88,6 @@
       ),
     );
   });
-
-  function flash(
-    _node: Element,
-    opts: { duration: number; from: string; to: string },
-  ) {
-    return {
-      duration: opts.duration,
-      css: (t: number) => {
-        const eased = cubicIn(t);
-        return `
-        background-color: color-mix(in srgb, ${opts.to} ${eased * 100}%, ${
-          opts.from
-        });
-        `;
-      },
-    };
-  }
 
   onMount(() => {
     if (!window.location.hash)
@@ -151,14 +134,8 @@
           bind:scenario={definition}
           on:edit={(e) => (_scenarios[key] = e.detail)}
         />
-        <div class="events">
-          {#each (_events[key] || [])
-            .map((e, idx) => [e, idx])
-            .reverse() as [event, idx] (idx)}
-            <div in:flash={{ from: "lightgreen", to: "white", duration: 200 }}>
-              {JSON.stringify(event)}
-            </div>
-          {/each}
+        <div class="event-viewer">
+          <EventViewer events={_events[key] || []} />
         </div>
       </div>
     </div>
@@ -224,11 +201,9 @@
     width: 100%;
   }
 
-  .events {
-    overflow: auto;
-    background-color: white;
-    font-family: monospace;
-    border: 1px solid silver;
+  .event-viewer {
+    display: table-row;
     grid-column: 1 / -1;
+    overflow: auto;
   }
 </style>
