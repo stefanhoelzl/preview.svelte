@@ -18,7 +18,11 @@
   }
 </script>
 
-<textarea class="scenario" on:input={(e) => update(e.currentTarget.value)}>
+<textarea
+  class="scenario"
+  on:input={(e) => update(e.currentTarget.value)}
+  wrap="off"
+>
   {JSON.stringify(scenario, null, 2)}
 </textarea>
 

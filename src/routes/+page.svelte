@@ -10,6 +10,21 @@
     red: {
       props: { color: "red" },
     },
+    green: {
+      props: { color: "green" },
+    },
+    yellow: {
+      props: { color: "yellow" },
+    },
+    purple: {
+      props: { color: "purple" },
+    },
+    whitesmoke: {
+      props: { color: "whitesmoke" },
+    },
+    lime: {
+      props: { color: "lime" },
+    },
   };
 </script>
 

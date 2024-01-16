@@ -31,8 +31,18 @@
   export let defaultCss: CSS = {};
   export let emits: Extract<keyof ComponentEvents<C>, string>[] = [];
   export let setTitle: boolean = true;
+  export let columns = Math.ceil(Math.sqrt(Object.keys(scenarios).length));
 
-  let selectedScenario = Object.keys(scenarios)[0];
+  let selectedScenario: string | undefined = undefined;
+  onMount(() => {
+    const hash = window.location.hash.slice(1);
+    if (scenarios[hash]) selectedScenario = hash;
+  });
+  $: try {
+    window.location.hash = selectedScenario || "";
+  } catch {
+    // ignore
+  }
 
   function scenarioState(scenario: Scenario): ScenarioState {
     return {
@@ -46,6 +56,8 @@
     };
   }
 
+  $: asGrid = selectedScenario === undefined;
+
   if (setTitle)
     onMount(() => {
       window.document.title = component.name.replace(
@@ -57,29 +69,39 @@
 
 <div class="preview">
   <div class="nav">
+    <button
+      class="tab"
+      style:margin-right="1em"
+      class:selected={asGrid}
+      on:click={() => (selectedScenario = undefined)}
+    >
+      GRID
+    </button>
     {#each Object.keys(scenarios) as key}
       <button
         class="tab"
-        class:selected={key === selectedScenario}
+        class:selected={selectedScenario === key}
         on:click={() => (selectedScenario = key)}
       >
         {key}
       </button>
     {/each}
   </div>
-  {#each Object.entries(scenarios) as [key, scenario] (key)}
-    <div
-      class="scenario"
-      style:display={key === selectedScenario ? "flex" : "none"}
-    >
-      <ScenarioView
-        {key}
-        {component}
-        scenario={scenarioState(scenario)}
-        {emits}
-      />
-    </div>
-  {/each}
+  <div class="container" class:grid={asGrid} style:--cols={columns}>
+    {#each Object.entries(scenarios) as [key, scenario] (key)}
+      <div
+        class="scenario"
+        style:display={selectedScenario === key || asGrid ? "flex" : "none"}
+      >
+        <ScenarioView
+          {component}
+          scenario={scenarioState(scenario)}
+          {emits}
+          controls={!asGrid}
+        />
+      </div>
+    {/each}
+  </div>
 </div>
 
 <style>
@@ -113,5 +135,16 @@
 
   .tab.selected {
     background-color: lightsteelblue;
+  }
+
+  .container {
+    display: contents;
+  }
+
+  .grid {
+    display: grid;
+    height: 100%;
+    overflow: scroll;
+    grid-template-columns: repeat(var(--cols), 1fr);
   }
 </style>

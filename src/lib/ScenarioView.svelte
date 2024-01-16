@@ -5,11 +5,11 @@
   import ScenarioEditor from "$lib/ScenarioEditor.svelte";
   import Instance from "$lib/ScenarioInstance.svelte";
 
-  export let key: string;
   export let component: ComponentType;
   export let scenario: Scenario;
   export let defaultCss: CSS = {};
   export let emits: string[] = [];
+  export let controls: boolean = true;
 
   let state = {
     props: scenario.props,
@@ -24,7 +24,7 @@
   let events: Event[] = [];
 </script>
 
-<div id={key} class="scenario">
+<div class="scenario" class:grid={controls}>
   <div class="instance">
     <Instance
       {component}
@@ -33,8 +33,10 @@
       on:event={(e) => (events = [...events, e.detail])}
     />
   </div>
-  <ScenarioEditor scenario={state} on:edit={(e) => (state = e.detail)} />
-  <ScenarioEvents {events} />
+  {#if controls}
+    <ScenarioEditor scenario={state} on:edit={(e) => (state = e.detail)} />
+    <ScenarioEvents {events} />
+  {/if}
 </div>
 
 <style>
@@ -43,6 +45,9 @@
     height: 100%;
     display: grid;
     grid-gap: var(--padding);
+  }
+
+  .grid {
     grid-template: 3fr 2fr / 2fr minmax(200px, 1fr);
   }
 
