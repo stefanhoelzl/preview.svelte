@@ -32,25 +32,19 @@
   export let emits: Extract<keyof ComponentEvents<C>, string>[] = [];
   export let setTitle: boolean = true;
 
-  let _scenarios: Record<string, ScenarioState> = Object.fromEntries(
-    Object.entries(scenarios).map(([k, d]) => [
-      k,
-      {
-        props: d.props,
-        css: d.css || defaultCss,
-        size: {
-          width: d.size?.width || "100%",
-          height: d.size?.height || "100%",
-          children: d.size?.children || 0,
-        },
-      },
-    ]),
-  );
+  let selectedScenario = Object.keys(scenarios)[0];
 
-  onMount(() => {
-    if (!window.location.hash)
-      window.location.hash = Object.keys(_scenarios)[0] || "";
-  });
+  function scenarioState(scenario: Scenario): ScenarioState {
+    return {
+      props: scenario.props,
+      css: scenario.css || defaultCss,
+      size: {
+        width: scenario.size?.width || "100%",
+        height: scenario.size?.height || "100%",
+        children: scenario.size?.children || 0,
+      },
+    };
+  }
 
   if (setTitle)
     onMount(() => {
@@ -62,23 +56,50 @@
 </script>
 
 <div class="preview">
-  {#each Object.entries(_scenarios) as [key, scenario] (key)}
-    <ScenarioView {key} {component} {scenario} {emits} />
+  <div class="nav">
+    {#each Object.keys(scenarios) as key}
+      <button
+        class="tab"
+        class:selected={key === selectedScenario}
+        on:click={() => (selectedScenario = key)}
+      >
+        {key}
+      </button>
+    {/each}
+  </div>
+  {#each Object.entries(scenarios) as [key, scenario] (key)}
+    <div style:display={key === selectedScenario ? "contents" : "none"}>
+      <ScenarioView
+        {key}
+        {component}
+        scenario={scenarioState(scenario)}
+        {emits}
+      />
+    </div>
   {/each}
 </div>
 
 <style>
-  * {
-    --padding: 5px;
-    --nav-height: calc(2em + var(--padding) + var(--padding));
-    --preview-height: calc(100vh - var(--nav-height) - 1em);
-  }
-
   .preview {
-    position: relative;
-    height: var(--preview-height);
-    width: calc(100% - 1em);
+    height: 100vh;
+    width: 100svw;
     padding: var(--padding);
     background-color: whitesmoke;
+  }
+
+  .nav {
+    display: flex;
+  }
+
+  .tab {
+    text-decoration: none;
+    color: black;
+    padding: 0.5em;
+    border: 1px solid silver;
+    border-bottom: 0 white;
+  }
+
+  .tab.selected {
+    background-color: lightsteelblue;
   }
 </style>

@@ -37,50 +37,28 @@
 </script>
 
 <div id={key} class="scenario">
-  <a href="#{key}" class="nav">{key}</a>
-  <div class="content">
-    <Instance
-      {component}
-      bind:scenario={_scenario}
-      {emits}
-      on:event={(e) => eventHandler(key, e.detail)}
-    />
-    <ScenarioEditor
-      scenario={_scenario}
-      on:edit={(e) => (_scenario = e.detail)}
-    />
-    <div class="event-viewer">
-      <EventViewer events={_events[key] || []} />
-    </div>
+  <Instance
+    {component}
+    bind:scenario={_scenario}
+    {emits}
+    on:event={(e) => eventHandler(key, e.detail)}
+  />
+  <ScenarioEditor
+    scenario={_scenario}
+    on:edit={(e) => (_scenario = e.detail)}
+  />
+  <div class="event-viewer">
+    <EventViewer events={_events[key] || []} />
   </div>
 </div>
 
 <style>
-  .nav {
-    position: relative;
-    float: left;
-    text-decoration: none;
-    color: black;
-    padding: var(--padding);
-    border: 1px solid silver;
-    border-bottom: 0 white;
-  }
-
-  .content {
-    position: absolute;
-    top: var(--nav-height);
+  .scenario {
     width: 100%;
     height: 100%;
     display: grid;
     grid-gap: var(--padding);
     grid-template: 3fr 1fr / 2fr minmax(200px, 1fr);
-  }
-
-  .scenario:not(:target) > .nav {
-    background: lightsteelblue;
-  }
-  .scenario:not(:target) > .content {
-    display: none;
   }
 
   .event-viewer {
