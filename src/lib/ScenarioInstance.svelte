@@ -1,7 +1,10 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
-  import { type ComponentType, onMount, type SvelteComponent } from "svelte";
+  import {
+    type ComponentType,
+    type SvelteComponent,
+    onMount,
+    createEventDispatcher,
+  } from "svelte";
   import type { ScenarioState } from "$lib/Preview.svelte";
   import Resizeable from "$lib/Resizeable.svelte";
 
@@ -16,6 +19,27 @@
 
   onMount(() =>
     emits.forEach((e) => instance.$on(e, (event) => dispatch("event", event))),
+  );
+
+  /*
+  from what I have observed
+  * instance.$$.props is a mapping from `propName`->`prop index in ctx`
+  * instance.$$.ctx is a array with values
+
+  by using the index of `$$.props` we can get the value from `$$.ctx`
+  this allows us to reconstruct an object with all props.
+
+  An added `afterUpdate`-hook updates `scenario.props` after each update with this reconstructed props.
+  */
+  onMount(() =>
+    instance.$$.after_update.push(() => {
+      scenario.props = Object.fromEntries(
+        Object.entries(instance.$$.props).map(([prop, idx]) => [
+          prop,
+          instance.$$.ctx[idx as number],
+        ]),
+      );
+    }),
   );
 </script>
 
