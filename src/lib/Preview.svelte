@@ -30,6 +30,7 @@
   export let scenarios: Scenarios<C>;
   export let defaultCss: CSS = {};
   export let emits: Extract<keyof ComponentEvents<C>, string>[] = [];
+  export let setTitle: boolean = true;
 
   let _scenarios: Record<string, ScenarioState> = Object.fromEntries(
     Object.entries(scenarios).map(([k, d]) => [
@@ -51,10 +52,13 @@
       window.location.hash = Object.keys(_scenarios)[0] || "";
   });
 
-  onMount(() => {
-    window.document.title =
-      window.location.pathname.split("/").pop() || "Preview";
-  });
+  if (setTitle)
+    onMount(() => {
+      window.document.title = component.name.replace(
+        /Proxy<([A-z0-9]+)>/,
+        "$1",
+      );
+    });
 </script>
 
 <div class="preview">
