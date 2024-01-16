@@ -68,7 +68,10 @@
     {/each}
   </div>
   {#each Object.entries(scenarios) as [key, scenario] (key)}
-    <div style:display={key === selectedScenario ? "contents" : "none"}>
+    <div
+      class="scenario"
+      style:display={key === selectedScenario ? "flex" : "none"}
+    >
       <ScenarioView
         {key}
         {component}
@@ -81,10 +84,19 @@
 
 <style>
   .preview {
-    height: 100vh;
-    width: 100svw;
-    padding: var(--padding);
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: var(--height, 100svh);
+    width: var(--width, 100svw);
+    display: flex;
+    flex-flow: column;
     background-color: whitesmoke;
+  }
+
+  .scenario {
+    flex: 1 0 1px;
+    overflow: scroll;
   }
 
   .nav {
