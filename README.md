@@ -11,11 +11,15 @@
   
   // each scenario gets rendered in the preview
   const scenarios: Scenarios<YourComponent> = {
-    scenarioName: {
+    scenario1Name: {
       props: {},
       css: {}, // css styles applied to this scenario
-      size: { width: 100px, height: 100% } // restrict size available to the component
+      size: { width: "100px", height: "100%" } // restrict size available to the component
     },
+    scenario2Name: {
+      ...
+    },
+    ...
   };
   
   // default css styles are applied to all scenarios
