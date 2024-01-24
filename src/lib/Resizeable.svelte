@@ -9,11 +9,18 @@
   onMount(() => {
     observer = new ResizeObserver((entries) => {
       entries.forEach((entry) => {
-        const { width: widthInPixel, height: heightInPixel } =
-          entry.contentRect;
-        if (widthInPixel === 0 && heightInPixel === 0) return;
-        width = `${widthInPixel.toFixed(0)}px`;
-        height = `${heightInPixel.toFixed(0)}px`;
+        let heightInPx: number, widthInPx: number;
+        const computedStyle = getComputedStyle(resizeable);
+        if (computedStyle.getPropertyValue("box-sizing") == "border-box") {
+          heightInPx = entry.borderBoxSize[0].blockSize;
+          widthInPx = entry.borderBoxSize[0].inlineSize;
+        } else {
+          heightInPx = entry.contentRect.height;
+          widthInPx = entry.contentRect.width;
+        }
+        if (widthInPx === 0 && heightInPx === 0) return;
+        width = `${widthInPx.toFixed(0)}px`;
+        height = `${heightInPx.toFixed(0)}px`;
       });
     });
     observer.observe(resizeable);
