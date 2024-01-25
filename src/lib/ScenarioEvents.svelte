@@ -1,11 +1,12 @@
 <script lang="ts">
   import { cubicIn } from "svelte/easing";
+  import { stringifyJSObj } from "./StringifyJSObj.js";
 
   export let events: Event[];
 
   function summary(event: Event) {
     if (event instanceof CustomEvent)
-      return `${event.type}(${JSON.stringify(event.detail)})`;
+      return `${event.type}(${stringifyJSObj(event.detail, false)})`;
     else return `native(${event.type})`;
   }
 
@@ -14,11 +15,7 @@
     for (let prop in event) {
       eventObject[prop] = event[prop as keyof Event];
     }
-    return JSON.stringify(
-      eventObject,
-      (k, v) => (v === null ? undefined : v),
-      2,
-    );
+    return stringifyJSObj(eventObject);
   }
 
   function flash(
