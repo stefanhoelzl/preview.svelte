@@ -2,13 +2,13 @@
   import Preview, { type Scenarios } from "$lib/Preview.svelte";
   import Mock from "./Mock.svelte";
 
-  const emits = ["click"];
+  const emits = ["click", "changeDateTime"];
   const scenarios: Scenarios<Mock> = {
     blue: {
-      props: { color: "blue" },
+      props: { color: "blue", dateTime: new Date("2000-01-01T02:00") },
     },
     red: {
-      props: { color: "red" },
+      props: { color: "red", dateTime: new Date("2099-12-31T23:59") },
     },
     green: {
       props: { color: "green" },

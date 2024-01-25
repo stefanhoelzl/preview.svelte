@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-
+  import { stringifyJSObj, unstringifyJSObj } from "$lib/StringifyJSObj.js";
   import type { ScenarioState } from "$lib/Preview.svelte";
 
   const dispatch = createEventDispatcher<{
@@ -10,11 +10,14 @@
   export let scenario: ScenarioState;
 
   function update(raw: string) {
+    let value: ScenarioState;
     try {
-      dispatch("edit", JSON.parse(raw));
+      value = unstringifyJSObj(raw) as ScenarioState;
+      stringifyJSObj(value); // ensure value is stringifyable again
     } catch {
-      // ignore
+      return; // ignore errors
     }
+    dispatch("edit", value);
   }
 </script>
 
@@ -22,8 +25,7 @@
   class="scenario"
   on:input={(e) => update(e.currentTarget.value)}
   wrap="off"
->
-  {JSON.stringify(scenario, null, 2)}
+  >{stringifyJSObj(scenario)}
 </textarea>
 
 <style>
