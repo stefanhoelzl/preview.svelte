@@ -3,14 +3,18 @@
 
   export type CSS = Record<string, string>;
 
-  type ScenarioSize = { width?: string; height?: string; children?: number };
-  export type Scenario<C extends SvelteComponent = SvelteComponent> = {
+  type ScenarioSize = { width?: string; height?: string };
+  export type Scenario<
+    C extends SvelteComponent = SvelteComponent,
+    S = boolean,
+  > = {
     props: ComponentProps<C>;
+    slotData?: S;
     css?: CSS;
     size?: ScenarioSize;
   };
-  export type Scenarios<C extends SvelteComponent> = {
-    [key: string]: Scenario<C>;
+  export type Scenarios<C extends SvelteComponent, S = boolean> = {
+    [key: string]: Scenario<C, S>;
   };
 
   export type ScenarioState = Required<Scenario> & {
@@ -18,20 +22,23 @@
   };
 </script>
 
-<script lang="ts" generics="_C extends SvelteComponent">
+<script lang="ts" generics="_C extends SvelteComponent, _S">
   import { onMount, type ComponentType, type ComponentEvents } from "svelte";
   import ScenarioView from "$lib/ScenarioView.svelte";
 
   // _C is defined in the `generics` attribute of the `script` tag
   // but this is not recognized by eslint
   type C = _C; // eslint-disable-line no-undef
+  type S = _S; // eslint-disable-line no-undef
 
   export let component: ComponentType<C>;
-  export let scenarios: Scenarios<C>;
-  export let defaultCss: CSS = {};
+  export let scenarios: Scenarios<C, S>;
   export let emits: Extract<keyof ComponentEvents<C>, string>[] = [];
   export let setTitle: boolean = true;
   export let columns = Math.ceil(Math.sqrt(Object.keys(scenarios).length));
+
+  // create copy as array which is iterable AND modifyable
+  const editableScenarios = Object.entries(scenarios);
 
   let selectedScenario: string | undefined = undefined;
   onMount(() => {
@@ -42,18 +49,6 @@
     window.location.hash = selectedScenario || "";
   } catch {
     // ignore
-  }
-
-  function scenarioState(scenario: Scenario): ScenarioState {
-    return {
-      props: scenario.props,
-      css: scenario.css || defaultCss,
-      size: {
-        width: scenario.size?.width || "100%",
-        height: scenario.size?.height || "100%",
-        children: scenario.size?.children || 0,
-      },
-    };
   }
 
   $: asGrid = selectedScenario === undefined;
@@ -88,17 +83,16 @@
     {/each}
   </div>
   <div class="container" class:grid={asGrid} style:--cols={columns}>
-    {#each Object.entries(scenarios) as [key, scenario] (key)}
+    {#each editableScenarios as [key, scenario] (key)}
       <div
         class="scenario"
         style:display={selectedScenario === key || asGrid ? "flex" : "none"}
       >
-        <ScenarioView
-          {component}
-          scenario={scenarioState(scenario)}
-          {emits}
-          controls={!asGrid}
-        />
+        <ScenarioView {component} bind:scenario {emits} controls={!asGrid}>
+          {#if scenario.slotData !== undefined}
+            <slot slotData={scenario.slotData} />
+          {/if}
+        </ScenarioView>
       </div>
     {/each}
   </div>

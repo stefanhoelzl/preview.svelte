@@ -3,7 +3,7 @@
   import Mock from "./Mock.svelte";
 
   const emits = ["click", "changeDateTime"];
-  const scenarios: Scenarios<Mock> = {
+  const scenarios: Scenarios<Mock, { a: string; b: string }> = {
     blue: {
       props: { color: "blue", dateTime: new Date("2000-01-01T02:00") },
     },
@@ -12,6 +12,7 @@
     },
     green: {
       props: { color: "green" },
+      slotData: { a: "Hallo", b: "Welt" },
     },
     yellow: {
       props: { color: "yellow" },
@@ -28,4 +29,6 @@
   };
 </script>
 
-<Preview component={Mock} {emits} {scenarios} />
+<Preview component={Mock} {emits} {scenarios} let:slotData
+  >"{slotData?.a}, {slotData?.b}!"</Preview
+>

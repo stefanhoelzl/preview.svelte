@@ -1,8 +1,12 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, createEventDispatcher } from "svelte";
 
   export let width: string;
   export let height: string;
+
+  const dispatch = createEventDispatcher<{
+    setSize: { width: string; height: string };
+  }>();
 
   let resizeable: HTMLElement;
   let observer: ResizeObserver;
@@ -19,8 +23,10 @@
           widthInPx = entry.contentRect.width;
         }
         if (widthInPx === 0 && heightInPx === 0) return;
-        width = `${widthInPx.toFixed(0)}px`;
-        height = `${heightInPx.toFixed(0)}px`;
+        dispatch("setSize", {
+          width: `${widthInPx.toFixed(0)}px`,
+          height: `${heightInPx.toFixed(0)}px`,
+        });
       });
     });
     observer.observe(resizeable);
