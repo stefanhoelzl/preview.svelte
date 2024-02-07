@@ -1,25 +1,19 @@
-<script lang="ts">
-  import { type ComponentType } from "svelte";
-  import { type Scenario, type CSS } from "$lib/Preview.svelte";
+<script lang="ts" generics="_C extends SvelteComponent, _S">
+  import { type ComponentType, SvelteComponent } from "svelte"; // eslint-disable-line @typescript-eslint/no-unused-vars
+  import { type Scenario } from "$lib/Preview.svelte";
   import ScenarioEvents from "$lib/ScenarioEvents.svelte";
   import ScenarioEditor from "$lib/ScenarioEditor.svelte";
   import Instance from "$lib/ScenarioInstance.svelte";
 
+  // _C is defined in the `generics` attribute of the `script` tag
+  // but this is not recognized by eslint
+  type C = _C; // eslint-disable-line no-undef
+  type S = _S; // eslint-disable-line no-undef
+
   export let component: ComponentType;
-  export let scenario: Scenario;
-  export let defaultCss: CSS = {};
+  export let scenario: Scenario<C, S>;
   export let emits: string[] = [];
   export let controls: boolean = true;
-
-  let state = {
-    props: scenario.props,
-    css: scenario.css || defaultCss,
-    size: {
-      width: scenario.size?.width || "100%",
-      height: scenario.size?.height || "100%",
-      children: scenario.size?.children || 0,
-    },
-  };
 
   let events: Event[] = [];
 </script>
@@ -28,13 +22,15 @@
   <div class="instance">
     <Instance
       {component}
-      bind:scenario={state}
+      bind:scenario
       {emits}
       on:event={(e) => (events = [...events, e.detail])}
-    />
+    >
+      <slot />
+    </Instance>
   </div>
   {#if controls}
-    <ScenarioEditor scenario={state} on:edit={(e) => (state = e.detail)} />
+    <ScenarioEditor {scenario} on:edit={(e) => (scenario = e.detail)} />
     <ScenarioEvents {events} />
   {/if}
 </div>

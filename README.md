@@ -29,6 +29,27 @@
 <Preview component={YourComponent} {emits} {scenarios} {defaultCss} />
 ```
 
+Optionally it is also possible to test a slot 
+(currently no named slots are supported):
+```svelte
+<script lang="ts">
+  ...
+  type SlotData = { ... };
+  const scenarios: Scenarios<YourComponent, SlotData> = {
+    scenario1Name: {
+      props: {},
+      slotData: {...}
+    },
+    ...
+  };
+</script>
+
+<Preview component={YourComponent} {scenarios} let:slotData>
+    {slotData}
+</Preview>
+```
+
+
 ## dev
 
 ```bash

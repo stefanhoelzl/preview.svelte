@@ -24,16 +24,23 @@
     type="datetime-local"
     value={dateTime.toISOString().slice(0, 16)}
     on:change={(ev) => {
-      dateTime = new Date(ev.currentTarget?.value);
-      dispatch("changeDateTime", dateTime);
+      const newDateTime = new Date(ev.currentTarget?.value);
+      if (isNaN(newDateTime.valueOf())) return;
+      dateTime = newDateTime;
+      dispatch("changeDateTime", newDateTime);
     }}
   />
-  <slot />
+  <div class="slot">SLOT: <slot /></div>
 </div>
 
 <style>
   .mock {
     width: 100%;
     height: 100%;
+  }
+  .slot {
+    color: white;
+    font-weight: bold;
+    font-size: x-large;
   }
 </style>
