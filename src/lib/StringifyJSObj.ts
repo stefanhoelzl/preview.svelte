@@ -167,9 +167,6 @@ export function registerCustomType<T extends object>(
     name?: string;
   },
 ) {
-  const name = options?.name ?? options?.factory?.name ?? constructorFunc.name;
-  if (customTypePlugins.has(constructorFunc))
-    throw new Error(`The Plugin "${name}" was registered twice`);
   const custTypePlugin = (<object>{
     destructureFunc,
     ...options,
