@@ -44,12 +44,19 @@
   }
 
   .grid {
-    grid-template: 3fr 2fr / 2fr minmax(200px, 1fr);
+    grid-template: 3fr 2fr / 2fr 1fr;
   }
-
   .instance {
     display: grid;
     margin: 0.1em;
     grid-row: 1 / -1;
+  }
+  @media (max-width: 500px) {
+    .grid {
+      grid-template: 3fr 2fr 1fr / 1fr;
+    }
+    .instance {
+      grid-row: 1 / 1;
+    }
   }
 </style>
