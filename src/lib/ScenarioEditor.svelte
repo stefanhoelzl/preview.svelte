@@ -25,19 +25,36 @@
     }
     dispatch("edit", value);
   }
+
+  function setMaxSize() {
+    scenario.size = {
+      width: "100%",
+      height: "100%",
+    };
+    dispatch("edit", scenario);
+  }
 </script>
 
-<textarea
-  class="scenario"
-  on:input={(e) => update(e.currentTarget.value)}
-  wrap="off"
-  >{stringifyJSObj(scenario)}
-</textarea>
+<div>
+  <textarea on:input={(e) => update(e.currentTarget.value)} wrap="off"
+    >{stringifyJSObj(scenario)}
+  </textarea>
+  <button on:click={setMaxSize}>Set Max Size</button>
+</div>
 
 <style>
-  .scenario {
+  textarea {
     font-family: monospace;
     resize: none;
     border: 1px solid silver;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+  button {
+    position: relative;
+    bottom: 35px;
+    right: calc(-100% + 7em);
+    z-index: 1;
   }
 </style>
