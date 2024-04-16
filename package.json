@@ -8,12 +8,10 @@
     "prepublishOnly": "npm run package",
     "prepare": "npm run build",
     "dev": "vite dev",
-    "test": "npm run test:integration && npm run test:unit",
     "check": "svelte-kit sync && svelte-check --fail-on-warnings --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --fail-on-warnings --tsconfig ./tsconfig.json --watch",
     "lint": "eslint --ext=.svelte,.ts,.js,.cjs,.json --max-warnings=0 --ignore-path=.gitignore",
-    "test:integration": "playwright test",
-    "test:unit": "vitest"
+    "test": "vitest run"
   },
   "exports": {
     ".": {
@@ -30,23 +28,27 @@
     "svelte": "*"
   },
   "devDependencies": {
-    "@playwright/test": "*",
     "@sveltejs/adapter-auto": "*",
     "@sveltejs/kit": "*",
     "@sveltejs/package": "*",
     "@sveltejs/vite-plugin-svelte": "*",
+    "@testing-library/jest-dom": "*",
+    "@testing-library/svelte": "*",
     "@types/eslint": "*",
+    "@types/node": "^20.12.7",
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",
     "eslint": "*",
     "eslint-config-prettier": "*",
     "eslint-plugin-prettier": "*",
     "eslint-plugin-svelte": "*",
+    "happy-dom": "*",
     "prettier": "*",
     "prettier-plugin-svelte": "*",
     "publint": "*",
     "svelte": "*",
     "svelte-check": "*",
+    "tmp-promise": "*",
     "tslib": "*",
     "typescript": "*",
     "vite": "*",
