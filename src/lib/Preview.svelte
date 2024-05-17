@@ -8,7 +8,7 @@
     C extends SvelteComponent = SvelteComponent,
     S = boolean,
   > = {
-    props: ComponentProps<C>;
+    props?: ComponentProps<C>;
     slotData?: S;
     css?: CSS;
     size?: ScenarioSize;
