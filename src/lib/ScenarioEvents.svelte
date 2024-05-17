@@ -38,7 +38,7 @@
 
 <div class="scroll">
   <div class="events">
-    {#each events.reverse() as event (event)}
+    {#each events.toReversed() as event (event)}
       <details
         class="event"
         in:flash={{ from: "lightgreen", to: "white", duration: 200 }}
