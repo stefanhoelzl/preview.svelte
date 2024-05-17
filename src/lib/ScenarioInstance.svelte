@@ -56,7 +56,7 @@
     on:setSize={(ev) => (scenario.size = ev.detail)}
   >
     <div
-      class="instance"
+      class="view"
       style={Object.entries(scenario.css ?? {})
         .map(([k, v]) => `${k}: ${v}`)
         .join("; ")}
@@ -73,7 +73,7 @@
 </div>
 
 <style>
-  .instance {
+  .view {
     height: 100%;
     width: 100%;
   }

@@ -1,4 +1,4 @@
-import { beforeAll } from "vitest";
+import { beforeAll, beforeEach } from "vitest";
 import { compile } from "svelte/compiler";
 import "@testing-library/jest-dom/vitest";
 import { withFile } from "tmp-promise";
@@ -33,3 +33,7 @@ export async function createDynamicComponent(code: string) {
     return (await import(path)).default;
   });
 }
+
+beforeEach(() => {
+  window.location.hash = "";
+});
