@@ -12,6 +12,8 @@
   let observer: ResizeObserver;
   onMount(() => {
     observer = new ResizeObserver((entries) => {
+      if (!resizeable) return;
+
       entries.forEach((entry) => {
         let heightInPx: number, widthInPx: number;
         const computedStyle = getComputedStyle(resizeable);
