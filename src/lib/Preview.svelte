@@ -40,18 +40,23 @@
   // create copy as array which is iterable AND modifyable
   const editableScenarios = Object.entries(scenarios);
 
-  let selectedScenario: string | undefined = undefined;
+  let selectedScenario: string | undefined | null = undefined;
+
   onMount(() => {
     const hash = window.location.hash.slice(1);
     if (scenarios[hash]) selectedScenario = hash;
+    if (Object.keys(scenarios).length == 1)
+      selectedScenario = Object.keys(scenarios)[0];
   });
+
   $: try {
-    window.location.hash = selectedScenario || "";
+    if (selectedScenario !== undefined)
+      window.location.hash = selectedScenario || "";
   } catch {
     // ignore
   }
 
-  $: asGrid = selectedScenario === undefined;
+  $: asGrid = !selectedScenario;
 
   if (setTitle)
     onMount(() => {
@@ -68,7 +73,7 @@
       class="tab"
       style:margin-right="1em"
       class:selected={asGrid}
-      on:click={() => (selectedScenario = undefined)}
+      on:click={() => (selectedScenario = null)}
     >
       GRID
     </button>
