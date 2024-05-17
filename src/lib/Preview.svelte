@@ -89,16 +89,15 @@
   </div>
   <div class="container" class:grid={asGrid} style:--cols={columns}>
     {#each editableScenarios as [key, scenario] (key)}
-      <div
-        class="scenario"
-        style:display={selectedScenario === key || asGrid ? "flex" : "none"}
-      >
-        <ScenarioView {component} bind:scenario {emits} controls={!asGrid}>
-          {#if scenario.slotData !== undefined}
-            <slot slotData={scenario.slotData} />
-          {/if}
-        </ScenarioView>
-      </div>
+      {#if selectedScenario === key || asGrid}
+        <div class="scenario">
+          <ScenarioView {component} bind:scenario {emits} controls={!asGrid}>
+            {#if scenario.slotData !== undefined}
+              <slot slotData={scenario.slotData} />
+            {/if}
+          </ScenarioView>
+        </div>
+      {/if}
     {/each}
   </div>
 </div>
@@ -116,6 +115,7 @@
   }
 
   .scenario {
+    display: flex;
     flex: 1 0 1px;
     overflow: scroll;
   }
