@@ -1,12 +1,19 @@
 <script lang="ts">
-  import { onMount, createEventDispatcher } from "svelte";
+  import { onMount, type Snippet } from "svelte";
 
-  export let width: string;
-  export let height: string;
+  interface Props {
+    width: string;
+    height: string;
+    onsetsize: (ev: { width: string; height: string }) => void;
+    children: Snippet;
+  }
 
-  const dispatch = createEventDispatcher<{
-    setSize: { width: string; height: string };
-  }>();
+  let {
+    width = $bindable(),
+    height = $bindable(),
+    onsetsize,
+    children,
+  }: Props = $props();
 
   let resizeable: HTMLElement;
   let observer: ResizeObserver;
@@ -25,7 +32,7 @@
           widthInPx = entry.contentRect.width;
         }
         if (widthInPx === 0 && heightInPx === 0) return;
-        dispatch("setSize", {
+        onsetsize({
           width: `${widthInPx.toFixed(0)}px`,
           height: `${heightInPx.toFixed(0)}px`,
         });
@@ -36,7 +43,7 @@
 </script>
 
 <div class="resizeable" style:height style:width bind:this={resizeable}>
-  <slot />
+  {@render children?.()}
 </div>
 
 <style>

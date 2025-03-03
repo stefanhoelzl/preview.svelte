@@ -1,34 +1,44 @@
 <script lang="ts">
-  import Preview, { type Scenarios } from "$lib/Preview.svelte";
+  import Preview, { type Scenarios, eventHandler } from "$lib/Preview.svelte";
   import Mock from "./Mock.svelte";
 
-  const emits = ["click", "changeDateTime"];
-  const scenarios: Scenarios<Mock, { a: string; b: string }> = {
+  const events = { click: eventHandler(), changeDateTime: eventHandler() };
+  const scenarios: Scenarios<typeof Mock, { a: string; b: string }> = {
     blue: {
-      props: { color: "blue", dateTime: new Date("2000-01-01T02:00") },
+      props: {
+        color: "blue",
+        dateTime: new Date("2000-01-01T02:00"),
+        ...events,
+      },
     },
     red: {
-      props: { color: "red", dateTime: new Date("2099-12-31T23:59") },
+      props: {
+        color: "red",
+        dateTime: new Date("2099-12-31T23:59"),
+        ...events,
+      },
     },
     green: {
-      props: { color: "green" },
-      slotData: { a: "Hallo", b: "Welt" },
+      props: { color: "green", ...events },
+      slotData: { a: "Hello", b: "Slot" },
     },
     yellow: {
-      props: { color: "yellow" },
+      props: { color: "yellow", ...events },
     },
     purple: {
-      props: { color: "purple" },
+      props: { color: "purple", ...events },
     },
     whitesmoke: {
-      props: { color: "whitesmoke" },
+      props: { color: "whitesmoke", ...events },
     },
     lime: {
-      props: { color: "lime" },
+      props: { color: "lime", ...events },
     },
   };
 </script>
 
-<Preview component={Mock} {emits} {scenarios} let:slotData
-  >"{slotData?.a}, {slotData?.b}!"</Preview
->
+<Preview component={Mock} {scenarios}>
+  {#snippet children(slotData)}
+    SLOT: "{slotData?.a}, {slotData?.b}!"
+  {/snippet}
+</Preview>

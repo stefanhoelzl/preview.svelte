@@ -1,37 +1,49 @@
-<script lang="ts" generics="_C extends SvelteComponent, _S">
-  import { type ComponentType, SvelteComponent } from "svelte"; // eslint-disable-line @typescript-eslint/no-unused-vars
-  import { type Scenario } from "$lib/Preview.svelte";
-  import ScenarioEvents from "$lib/ScenarioEvents.svelte";
-  import ScenarioEditor from "$lib/ScenarioEditor.svelte";
+<script lang="ts" generics="C extends Component, S">
+  import Events from "$lib/ScenarioEvents.svelte";
+  import Editor from "$lib/ScenarioEditor.svelte";
   import Instance from "$lib/ScenarioInstance.svelte";
+  import type { Component, Snippet } from "svelte";
+  import type { Scenario, Event } from "$lib/Preview.svelte";
 
   // _C is defined in the `generics` attribute of the `script` tag
   // but this is not recognized by eslint
-  type C = _C; // eslint-disable-line no-undef
-  type S = _S; // eslint-disable-line no-undef
+  //type C = _C; // eslint-disable-line no-undef
+  //type S = _S; // eslint-disable-line no-undef
 
-  export let component: ComponentType;
-  export let scenario: Scenario<C, S>;
-  export let emits: string[] = [];
-  export let controls: boolean = true;
+  interface Props {
+    component: C;
+    scenario: Scenario<C, S>;
+    controls?: boolean;
+    children?: Snippet;
+  }
 
-  let events: Event[] = [];
+  let { component, scenario, controls = true, children }: Props = $props();
+  let events: Event[] = $state([]);
+
+  let scenarioState = $state(scenario);
 </script>
 
 <div class="scenario" class:grid={controls}>
   <div class="instance">
     <Instance
       {component}
-      bind:scenario
-      {emits}
-      on:event={(e) => (events = [...events, e.detail])}
+      bind:scenario={scenarioState}
+      onevent={(ev) => events.push(ev)}
     >
-      <slot />
+      {@render children?.()}
     </Instance>
   </div>
   {#if controls}
-    <ScenarioEditor {scenario} on:edit={(e) => (scenario = e.detail)} />
-    <ScenarioEvents {events} />
+    <Editor
+      scenario={scenarioState}
+      onedit={(ev) => (scenarioState = ev)}
+      onsetmaxsize={() =>
+        (scenarioState.size = {
+          width: "100%",
+          height: "100%",
+        })}
+    />
+    <Events {events} />
   {/if}
 </div>
 

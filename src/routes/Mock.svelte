@@ -1,36 +1,44 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import type { Snippet } from "svelte";
 
-  export let color = "blue";
-  export let dateTime = new Date();
+  interface Props {
+    color?: string;
+    dateTime?: Date;
+    click: (c: string) => void;
+    changeDateTime: (d: Date) => void;
+    children?: Snippet;
+  }
+
+  let {
+    color = $bindable("blue"),
+    dateTime = $bindable(new Date()),
+    click,
+    changeDateTime,
+    children,
+  }: Props = $props();
 
   let choices = ["blue", "red", "green"];
-
-  const dispatch = createEventDispatcher<{
-    click: string;
-    changeDateTime: Date;
-  }>();
 </script>
 
 <div class="mock" style:background-color={color}>
   <select bind:value={color}>
-    {#each choices as choice}
+    {#each choices as choice (choice)}
       <option selected={choice === color}>{choice}</option>
     {/each}
   </select>
-  <button on:click={() => dispatch("click", color)}> CLICK ME! </button>
+  <button onclick={() => click(color)}> CLICK ME! </button>
   <br />
   <input
     type="datetime-local"
     value={dateTime.toISOString().slice(0, 16)}
-    on:change={(ev) => {
+    onchange={(ev) => {
       const newDateTime = new Date(ev.currentTarget?.value);
       if (isNaN(newDateTime.valueOf())) return;
       dateTime = newDateTime;
-      dispatch("changeDateTime", newDateTime);
+      changeDateTime(newDateTime);
     }}
   />
-  <div class="slot">SLOT: <slot /></div>
+  <div class="slot">{@render children?.()}</div>
 </div>
 
 <style>

@@ -3,16 +3,16 @@
 ## usage
 ```svelte
 <script lang="ts">
-  import Preview, { type Scenarios } from "preview.svelte";
+  import Preview, { type Scenarios, eventHandler } from "preview.svelte";
   import YourComponent from "$lib/YourComponent.svelte";
-  
-  // list all events you want to see when dispatched
-  const emits = ["click"];
   
   // each scenario gets rendered in the preview
   const scenarios: Scenarios<YourComponent> = {
     scenario1Name: {
-      props: {},
+      props: {
+        key: "prop value",
+        onclick: eventHandler(),
+      },
       css: {}, // css styles applied to this scenario
       size: { width: "100px", height: "100%" } // restrict size available to the component
     },
@@ -21,12 +21,9 @@
     },
     ...
   };
-  
-  // default css styles are applied to all scenarios
-  const defaultCss = { opacity: "0.5" }
 </script>
 
-<Preview component={YourComponent} {emits} {scenarios} {defaultCss} />
+<Preview component={YourComponent} {scenarios} />
 ```
 
 Optionally it is also possible to test a slot 
@@ -44,8 +41,10 @@ Optionally it is also possible to test a slot
   };
 </script>
 
-<Preview component={YourComponent} {scenarios} let:slotData>
+<Preview component={YourComponent} {scenarios}>
+  {#snippet children(slotData)}
     {slotData}
+  {/snippet}
 </Preview>
 ```
 

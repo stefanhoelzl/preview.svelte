@@ -1,16 +1,15 @@
 {
   "name": "preview.svelte",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "scripts": {
-    "build": "vite build && npm run package",
+    "build": "vite build",
     "preview": "vite preview",
-    "package": "svelte-kit sync && svelte-package && publint",
+    "package": "npm run build && svelte-kit sync && svelte-package && publint",
     "prepublishOnly": "npm run package",
-    "prepare": "npm run build",
     "dev": "vite dev",
     "check": "svelte-kit sync && svelte-check --fail-on-warnings --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --fail-on-warnings --tsconfig ./tsconfig.json --watch",
-    "lint": "eslint --ext=.svelte,.ts,.js,.cjs,.json --max-warnings=0 --ignore-path=.gitignore",
+    "lint": "eslint --ext=.svelte,.ts,.js,.json --max-warnings=0",
     "test": "vitest run"
   },
   "exports": {
@@ -28,6 +27,7 @@
     "svelte": "*"
   },
   "devDependencies": {
+    "@eslint/compat": "*",
     "@sveltejs/adapter-auto": "*",
     "@sveltejs/kit": "*",
     "@sveltejs/package": "*",
@@ -35,14 +35,17 @@
     "@testing-library/jest-dom": "*",
     "@testing-library/svelte": "*",
     "@types/eslint": "*",
-    "@types/node": "^20.12.7",
+    "@types/node": "*",
     "@typescript-eslint/eslint-plugin": "*",
     "@typescript-eslint/parser": "*",
     "eslint": "*",
     "eslint-config-prettier": "*",
+    "eslint-plugin-json": "*",
     "eslint-plugin-prettier": "*",
     "eslint-plugin-svelte": "*",
+    "globals": "*",
     "happy-dom": "*",
+    "jiti": "*",
     "prettier": "*",
     "prettier-plugin-svelte": "*",
     "publint": "*",
@@ -51,10 +54,12 @@
     "tmp-promise": "*",
     "tslib": "*",
     "typescript": "*",
+    "typescript-eslint": "*",
     "vite": "*",
     "vitest": "*"
   },
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "type": "module"
+  "type": "module",
+  "dependencies": {}
 }

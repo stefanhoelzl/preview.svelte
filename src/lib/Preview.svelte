@@ -1,46 +1,68 @@
-<script lang="ts" context="module">
-  import { type ComponentProps, type SvelteComponent } from "svelte";
+<script lang="ts" module>
+  import { type ComponentProps, type Component } from "svelte";
+  import { stringifyJSObj } from "./StringifyJSObj.js";
 
   export type CSS = Record<string, string>;
 
   type ScenarioSize = { width?: string; height?: string };
-  export type Scenario<
-    C extends SvelteComponent = SvelteComponent,
-    S = boolean,
-  > = {
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export type Scenario<C extends Component<any, any, any>, S> = {
     props?: ComponentProps<C>;
     slotData?: S;
     css?: CSS;
     size?: ScenarioSize;
   };
-  export type Scenarios<C extends SvelteComponent, S = boolean> = {
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export type Scenarios<C extends Component<any, any, any>, S = undefined> = {
     [key: string]: Scenario<C, S>;
   };
 
-  export type ScenarioState = Required<Scenario> & {
-    size: Required<ScenarioSize>;
-  };
+  export type Event = { summary: string; details: string };
+  type EventParser = (event: string, payload: unknown) => Event;
+
+  export class EventHandler {
+    public eventParser: EventParser;
+    constructor(eventParser: EventParser) {
+      this.eventParser = eventParser;
+    }
+  }
+
+  export function eventHandler(
+    eventParser: EventParser = (evt, payload) => ({
+      summary: evt,
+      details: stringifyJSObj(payload),
+    }),
+  ) {
+    // return type needs to be mapped to () => void to match the event prop types.
+    return new EventHandler(eventParser) as unknown as () => void;
+  }
 </script>
 
-<script lang="ts" generics="_C extends SvelteComponent, _S">
-  import { onMount, type ComponentType, type ComponentEvents } from "svelte";
+<!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
+<script lang="ts" generics="C extends Component<any, any, any>, S">
+  import { onMount, type Snippet } from "svelte";
   import ScenarioView from "$lib/ScenarioView.svelte";
 
-  // _C is defined in the `generics` attribute of the `script` tag
-  // but this is not recognized by eslint
-  type C = _C; // eslint-disable-line no-undef
-  type S = _S; // eslint-disable-line no-undef
+  interface Props {
+    component: C;
+    scenarios: Scenarios<C, S>;
+    setTitle?: boolean;
+    columns?: number;
+    children?: Snippet<[S]>;
+  }
 
-  export let component: ComponentType<C>;
-  export let scenarios: Scenarios<C, S>;
-  export let emits: Extract<keyof ComponentEvents<C>, string>[] = [];
-  export let setTitle: boolean = true;
-  export let columns = Math.ceil(Math.sqrt(Object.keys(scenarios).length));
+  let {
+    component,
+    scenarios,
+    children,
+    setTitle = true,
+    columns = Math.ceil(Math.sqrt(Object.keys(scenarios).length)),
+  }: Props = $props();
 
-  // create copy as array which is iterable AND modifyable
-  const editableScenarios = Object.entries(scenarios);
-
-  let selectedScenario: string | undefined | null = undefined;
+  let selectedScenario: string | undefined | null = $state(undefined);
+  let asGrid = $derived(!selectedScenario);
 
   onMount(() => {
     const hash = window.location.hash.slice(1);
@@ -49,51 +71,53 @@
       selectedScenario = Object.keys(scenarios)[0];
   });
 
-  $: try {
-    if (selectedScenario !== undefined)
-      window.location.hash = selectedScenario || "";
-  } catch {
-    // ignore
-  }
-
-  $: asGrid = !selectedScenario;
+  $effect(() => {
+    try {
+      if (selectedScenario !== undefined)
+        window.location.hash = selectedScenario || "";
+    } catch {
+      // ignore
+    }
+  });
 
   if (setTitle)
-    onMount(() => {
-      window.document.title = component.name.replace(
-        /Proxy<([A-z0-9]+)>/,
-        "$1",
-      );
+    $effect(() => {
+      window.document.title = selectedScenario || "preview.svelte";
     });
 </script>
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 <div class="preview">
   <div class="nav">
     <button
       class="tab"
       style:margin-right="1em"
       class:selected={asGrid}
-      on:click={() => (selectedScenario = null)}
+      onclick={() => (selectedScenario = null)}
     >
       GRID
     </button>
-    {#each Object.keys(scenarios) as key}
+    {#each Object.keys(scenarios) as key (key)}
       <button
         class="tab"
         class:selected={selectedScenario === key}
-        on:click={() => (selectedScenario = key)}
+        onclick={() => (selectedScenario = key)}
       >
         {key}
       </button>
     {/each}
   </div>
   <div class="container" class:grid={asGrid} style:--cols={columns}>
-    {#each editableScenarios as [key, scenario] (key)}
+    {#each Object.entries(scenarios) as [key, scenario] (key)}
       {#if selectedScenario === key || asGrid}
         <div class="scenario">
-          <ScenarioView {component} bind:scenario {emits} controls={!asGrid}>
+          <ScenarioView
+            {component}
+            scenario={scenarios[key]}
+            controls={!asGrid}
+          >
             {#if scenario.slotData !== undefined}
-              <slot slotData={scenario.slotData} />
+              {@render children?.(scenario.slotData)}
             {/if}
           </ScenarioView>
         </div>

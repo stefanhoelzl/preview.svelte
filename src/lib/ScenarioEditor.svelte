@@ -1,19 +1,15 @@
-<script lang="ts" generics="_C extends SvelteComponent, _S">
-  import type { SvelteComponent } from "svelte"; // eslint-disable-line @typescript-eslint/no-unused-vars
-  import { createEventDispatcher } from "svelte";
+<script lang="ts" generics="C extends Component, S">
   import { stringifyJSObj, unstringifyJSObj } from "$lib/StringifyJSObj.js";
   import type { Scenario } from "$lib/Preview.svelte";
+  import type { Component } from "svelte";
 
-  const dispatch = createEventDispatcher<{
-    edit: Scenario<C, S>;
-  }>();
+  interface Props {
+    scenario: Scenario<C, S>;
+    onedit: (e: Scenario<C, S>) => void;
+    onsetmaxsize: () => void;
+  }
 
-  // _C is defined in the `generics` attribute of the `script` tag
-  // but this is not recognized by eslint
-  type C = _C; // eslint-disable-line no-undef
-  type S = _S; // eslint-disable-line no-undef
-
-  export let scenario: Scenario<C, S>;
+  let { scenario, onedit, onsetmaxsize }: Props = $props();
 
   function update(raw: string) {
     let value: Scenario<C, S>;
@@ -23,23 +19,15 @@
     } catch {
       return; // ignore errors
     }
-    dispatch("edit", value);
-  }
-
-  function setMaxSize() {
-    scenario.size = {
-      width: "100%",
-      height: "100%",
-    };
-    dispatch("edit", scenario);
+    onedit(value);
   }
 </script>
 
 <div>
-  <textarea on:input={(e) => update(e.currentTarget.value)} wrap="off"
-    >{stringifyJSObj(scenario)}
+  <textarea oninput={(e) => update(e.currentTarget.value)} wrap="soft">
+    {stringifyJSObj(scenario)}
   </textarea>
-  <button on:click={setMaxSize}>Set Max Size</button>
+  <button onclick={() => onsetmaxsize()}>Set Max Size</button>
 </div>
 
 <style>

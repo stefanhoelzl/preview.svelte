@@ -9,7 +9,6 @@ node_modules
 .env
 .env.*
 !.env.example
-vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 /test-results/
 /playwright-report/

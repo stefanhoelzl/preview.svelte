@@ -95,29 +95,36 @@ test("shows scenarios with different props", async () => {
 
 test("shows slot data", async () => {
   const P = await withTemporaryModule(
-    "<div>slot: <slot /></div>",
+    `
+    <script>let {children} = $props()</script>
+    <div>{@render children()}</div>
+    `,
     async (modulePath) => {
       return await createDynamicComponent(`
       <script>
         import Preview from "$lib/Preview.svelte";
         import C from "${modulePath}";
         
-        const scenarios = {a: {slotData: "content"}};
+        const scenarios = {a: {slotData: "slot-content"}};
       </script>
-      <Preview component={C} {scenarios} let:slotData>{slotData}</Preview>
+      <Preview component={C} {scenarios}>
+        {#snippet children(slotData)}
+          {slotData}
+        {/snippet}
+      </Preview>
     `);
     },
   );
   render(P);
 
-  expect(screen.queryByText("slot: content")).toBeInTheDocument();
+  expect(screen.queryByText("slot-content")).toBeInTheDocument();
 });
 
-test("set window title to component name by default", async () => {
+test("set window title to scenario name", async () => {
   const C = await createDynamicComponent("<div />");
   window.document.title = "";
   render(Preview, { props: { component: C, scenarios: { a: {} } } });
-  expect(window.document.title).toBe("Component");
+  expect(window.document.title).toBe("a");
 });
 
 test("do not change window title", async () => {

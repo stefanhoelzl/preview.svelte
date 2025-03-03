@@ -1,24 +1,29 @@
 import { render, screen, fireEvent } from "@testing-library/svelte";
 import { expect, test } from "vitest";
 import { createDynamicComponent } from "./setup.js";
-import Preview from "$lib/Preview.svelte";
+import Preview, { eventHandler } from "$lib/Preview.svelte";
 
 test("shows events", async () => {
   const C = await createDynamicComponent(`
   <script>
-  import { createEventDispatcher } from "svelte";
-  const dispatch = createEventDispatcher();
-  let counter = 0;
+  let { onclick } = $props()
+  let counter = $state(0);
   </script>
   
-  <button on:click={() => {counter++; dispatch("click", counter);}}>count</button>
+  <button onclick={() => {counter++; onclick(counter);}}>count</button>
   `);
   const { container } = render(Preview, {
     props: {
       component: C,
-      emits: ["click"],
       scenarios: {
-        a: {},
+        a: {
+          props: {
+            onclick: eventHandler((e, c) => ({
+              summary: `${e}(${c})`,
+              details: "",
+            })),
+          },
+        },
       },
     },
   });
@@ -32,5 +37,5 @@ test("shows events", async () => {
     Array.from(container.querySelectorAll(".events summary")).map(
       (s) => s.textContent,
     ),
-  ).toEqual(["click(4)", "click(3)", "click(2)", "click(1)"]);
+  ).toEqual(["onclick(4)", "onclick(3)", "onclick(2)", "onclick(1)"]);
 });

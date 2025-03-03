@@ -1,50 +1,42 @@
 <script lang="ts">
   import { cubicIn } from "svelte/easing";
-  import { stringifyJSObj } from "./StringifyJSObj.js";
+  import type { Event } from "$lib/Preview.svelte";
 
-  export let events: Event[];
-
-  function summary(event: Event) {
-    if (event instanceof CustomEvent)
-      return `${event.type}(${stringifyJSObj(event.detail, false)})`;
-    else return `native(${event.type})`;
+  interface Props {
+    events: Event[];
   }
 
-  function details(event: Event) {
-    const eventObject: Record<string, unknown> = {};
-    for (let prop in event) {
-      eventObject[prop] = event[prop as keyof Event];
-    }
-    return stringifyJSObj(eventObject);
-  }
+  let { events }: Props = $props();
 
   function flash(
-    _node: Element,
+    node: Element,
     opts: { duration: number; from: string; to: string },
   ) {
-    return {
-      duration: opts.duration,
-      css: (t: number) => {
-        const eased = cubicIn(t);
-        return `
-        background-color: color-mix(in srgb, ${opts.to} ${eased * 100}%, ${
-          opts.from
-        });
-        `;
-      },
-    };
+    if (node.animate !== undefined)
+      return {
+        duration: opts.duration,
+        css: (t: number) => {
+          const eased = cubicIn(t);
+          return `
+            background-color: color-mix(in srgb, ${opts.to} ${eased * 100}%, ${
+              opts.from
+            });
+           `;
+        },
+      };
+    return {};
   }
 </script>
 
 <div class="scroll">
   <div class="events">
-    {#each events.toReversed() as event (event)}
+    {#each events.toReversed() as event, idx (events.length - idx)}
       <details
         class="event"
         in:flash={{ from: "lightgreen", to: "white", duration: 200 }}
       >
-        <summary>{summary(event)}</summary>
-        <pre>{details(event)}</pre>
+        <summary>{event.summary}</summary>
+        <pre>{event.details}</pre>
       </details>
     {/each}
   </div>

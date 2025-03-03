@@ -1,74 +1,86 @@
-<script lang="ts" generics="_C extends SvelteComponent, _S">
+<script lang="ts" generics="C extends Component, S">
   import {
-    type ComponentType,
-    type SvelteComponent,
-    type ComponentProps,
     onMount,
-    createEventDispatcher,
+    mount,
+    onDestroy,
+    unmount,
+    type Component,
+    type Snippet,
   } from "svelte";
-  import type { Scenario } from "$lib/Preview.svelte";
   import Resizeable from "$lib/Resizeable.svelte";
+  import { type Scenario, EventHandler, type Event } from "$lib/Preview.svelte";
 
-  const dispatch = createEventDispatcher<{
-    event: Event;
-  }>();
+  interface Props {
+    component: Component<C>;
+    scenario: Scenario<C, S>;
+    onevent: (ev: Event) => void;
+    children?: Snippet;
+  }
 
-  // _C is defined in the `generics` attribute of the `script` tag
-  // but this is not recognized by eslint
-  type C = _C; // eslint-disable-line no-undef
-  type S = _S; // eslint-disable-line no-undef
+  let {
+    component,
+    scenario = $bindable(),
+    onevent,
+    children,
+    ...slots
+  }: Props = $props();
 
-  export let component: ComponentType;
-  export let scenario: Scenario<C, S>;
-  export let emits: string[] = [];
-  let instance: SvelteComponent;
+  let instanceProps = $state({
+    ...scenario.props,
+    children,
+    ...slots,
+  });
 
-  onMount(() =>
-    emits.forEach((e) => instance.$on(e, (event) => dispatch("event", event))),
-  );
+  if (scenario.props !== undefined) {
+    Object.entries(scenario.props).forEach(([key, value]) => {
+      if (value instanceof EventHandler) {
+        // inject event handlers for event properties
 
-  /*
-  from what I have observed
-  * instance.$$.props is a mapping from `propName`->`prop index in ctx`
-  * instance.$$.ctx is a array with values
+        // @ts-expect-error unknown type of ...[key]
+        delete scenario.props[key];
+        // @ts-expect-error unknown type of ...[key]
+        instanceProps[key] = (...e: unknown[]) =>
+          onevent(value.eventParser(key, e));
+      } else {
+        // synchronizes changes between scenario.props and instanceProps
 
-  by using the index of `$$.props` we can get the value from `$$.ctx`
-  this allows us to reconstruct an object with all props.
+        // @ts-expect-error unknown type of ...[key]
+        $effect(() => (instanceProps[key] = scenario.props[key]));
+        // @ts-expect-error unknown type of ...[key]
+        $effect(() => (scenario.props[key] = instanceProps[key]));
+      }
+    });
+    Object.keys(slots).forEach((key) => {
+      // synchronizes changes between scenario.slots and instanceProps
 
-  An added `afterUpdate`-hook updates `scenario.props` after each update with this reconstructed props.
-  */
-  onMount(() =>
-    instance.$$.after_update.push(() => {
-      scenario.props = Object.fromEntries(
-        Object.entries(instance.$$.props).map(([prop, idx]) => [
-          prop,
-          instance.$$.ctx[idx as number],
-        ]),
-      ) as ComponentProps<C>;
-    }),
-  );
+      // @ts-expect-error unknown type of ...[key]
+      $effect(() => (instanceProps[key] = slots[key]));
+      // @ts-expect-error unknown type of ...[key]
+      $effect(() => (slots[key] = instanceProps[key]));
+    });
+  }
+
+  let target: Element;
+  onMount(() => {
+    // @ts-expect-error instanceProps does not match MountOptions<C>
+    const app = mount(component, { target, props: instanceProps });
+    onDestroy(() => unmount(app));
+  });
 </script>
 
 <div class="container">
   <Resizeable
     height={scenario.size?.height ?? "100%"}
     width={scenario.size?.width ?? "100%"}
-    on:setSize={(ev) => (scenario.size = ev.detail)}
+    onsetsize={(ev) => (scenario.size = ev)}
   >
     <div
+      bind:this={target}
       class="view"
       style={Object.entries(scenario.css ?? {})
         .map(([k, v]) => `${k}: ${v}`)
         .join("; ")}
-    >
-      <svelte:component
-        this={component}
-        bind:this={instance}
-        {...scenario.props}
-      >
-        <slot />
-      </svelte:component>
-    </div>
+    ></div>
   </Resizeable>
 </div>
 
