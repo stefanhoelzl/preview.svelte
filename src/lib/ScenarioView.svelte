@@ -1,23 +1,17 @@
-<script lang="ts" generics="C extends Component, S">
+<script lang="ts" generics="C extends Component">
   import Events from "$lib/ScenarioEvents.svelte";
   import Editor from "$lib/ScenarioEditor.svelte";
   import Instance from "$lib/ScenarioInstance.svelte";
-  import type { Component, Snippet } from "svelte";
+  import type { Component } from "svelte";
   import type { Scenario, Event } from "$lib/Preview.svelte";
-
-  // _C is defined in the `generics` attribute of the `script` tag
-  // but this is not recognized by eslint
-  //type C = _C; // eslint-disable-line no-undef
-  //type S = _S; // eslint-disable-line no-undef
 
   interface Props {
     component: C;
-    scenario: Scenario<C, S>;
+    scenario: Scenario<C>;
     controls?: boolean;
-    children?: Snippet;
   }
 
-  let { component, scenario, controls = true, children }: Props = $props();
+  let { component, scenario, controls = true }: Props = $props();
   let events: Event[] = $state([]);
 
   let scenarioState = $state(scenario);
@@ -29,9 +23,7 @@
       {component}
       bind:scenario={scenarioState}
       onevent={(ev) => events.push(ev)}
-    >
-      {@render children?.()}
-    </Instance>
+    ></Instance>
   </div>
   {#if controls}
     <Editor

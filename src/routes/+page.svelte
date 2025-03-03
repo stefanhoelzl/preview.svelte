@@ -3,7 +3,7 @@
   import Mock from "./Mock.svelte";
 
   const events = { click: eventHandler(), changeDateTime: eventHandler() };
-  const scenarios: Scenarios<typeof Mock, { a: string; b: string }> = {
+  const scenarios: Scenarios<typeof Mock> = {
     blue: {
       props: {
         color: "blue",
@@ -19,11 +19,10 @@
       },
     },
     green: {
-      props: { color: "green", ...events },
-      slotData: { a: "Hello", b: "Slot" },
+      props: { color: "green", children, ...events },
     },
     yellow: {
-      props: { color: "yellow", ...events },
+      props: { color: "yellow", custom, ...events },
     },
     purple: {
       props: { color: "purple", ...events },
@@ -37,8 +36,12 @@
   };
 </script>
 
-<Preview component={Mock} {scenarios}>
-  {#snippet children(slotData)}
-    SLOT: "{slotData?.a}, {slotData?.b}!"
-  {/snippet}
-</Preview>
+{#snippet custom(color: string)}
+  Hello, {color}!
+{/snippet}
+
+{#snippet children()}
+  Hello, Snippet!
+{/snippet}
+
+<Preview component={Mock} {scenarios}></Preview>

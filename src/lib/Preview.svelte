@@ -7,16 +7,15 @@
   type ScenarioSize = { width?: string; height?: string };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export type Scenario<C extends Component<any, any, any>, S> = {
+  export type Scenario<C extends Component<any, any, any>> = {
     props?: ComponentProps<C>;
-    slotData?: S;
     css?: CSS;
     size?: ScenarioSize;
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  export type Scenarios<C extends Component<any, any, any>, S = undefined> = {
-    [key: string]: Scenario<C, S>;
+  export type Scenarios<C extends Component<any, any, any>> = {
+    [key: string]: Scenario<C>;
   };
 
   export type Event = { summary: string; details: string };
@@ -41,22 +40,21 @@
 </script>
 
 <!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
-<script lang="ts" generics="C extends Component<any, any, any>, S">
+<script lang="ts" generics="C extends Component<any, any, any>">
   import { onMount, type Snippet } from "svelte";
   import ScenarioView from "$lib/ScenarioView.svelte";
 
   interface Props {
     component: C;
-    scenarios: Scenarios<C, S>;
+    scenarios: Scenarios<C>;
     setTitle?: boolean;
     columns?: number;
-    children?: Snippet<[S]>;
+    children?: Snippet<unknown[]>;
   }
 
   let {
     component,
     scenarios,
-    children,
     setTitle = true,
     columns = Math.ceil(Math.sqrt(Object.keys(scenarios).length)),
   }: Props = $props();
@@ -108,18 +106,11 @@
     {/each}
   </div>
   <div class="container" class:grid={asGrid} style:--cols={columns}>
-    {#each Object.entries(scenarios) as [key, scenario] (key)}
+    {#each Object.keys(scenarios) as key (key)}
       {#if selectedScenario === key || asGrid}
         <div class="scenario">
-          <ScenarioView
-            {component}
-            scenario={scenarios[key]}
-            controls={!asGrid}
-          >
-            {#if scenario.slotData !== undefined}
-              {@render children?.(scenario.slotData)}
-            {/if}
-          </ScenarioView>
+          <ScenarioView {component} scenario={scenarios[key]} controls={!asGrid}
+          ></ScenarioView>
         </div>
       {/if}
     {/each}

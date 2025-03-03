@@ -1,35 +1,29 @@
-<script lang="ts" generics="C extends Component, S">
-  import {
-    onMount,
-    mount,
-    onDestroy,
-    unmount,
-    type Component,
-    type Snippet,
-  } from "svelte";
+<script lang="ts" generics="C extends Component">
+  import { onMount, mount, onDestroy, unmount, type Component } from "svelte";
   import Resizeable from "$lib/Resizeable.svelte";
   import { type Scenario, EventHandler, type Event } from "$lib/Preview.svelte";
 
   interface Props {
     component: Component<C>;
-    scenario: Scenario<C, S>;
+    scenario: Scenario<C>;
     onevent: (ev: Event) => void;
-    children?: Snippet;
   }
 
-  let {
-    component,
-    scenario = $bindable(),
-    onevent,
-    children,
-    ...slots
-  }: Props = $props();
+  let { component, scenario = $bindable(), onevent }: Props = $props();
 
-  let instanceProps = $state({
-    ...scenario.props,
-    children,
-    ...slots,
-  });
+  let instanceProps = $state({});
+
+  function isSnippet(maybeSnippet: unknown): boolean {
+    // could not find a better way to check if a prop is a snippet
+    return (
+      typeof maybeSnippet === "function" &&
+      !!maybeSnippet
+        .toString()
+        .match(
+          /var previous_component_function = dev_current_component_function;/,
+        )
+    );
+  }
 
   if (scenario.props !== undefined) {
     Object.entries(scenario.props).forEach(([key, value]) => {
@@ -41,6 +35,14 @@
         // @ts-expect-error unknown type of ...[key]
         instanceProps[key] = (...e: unknown[]) =>
           onevent(value.eventParser(key, e));
+      } else if (isSnippet(value)) {
+        // not sure why this is needed exactly,
+        // but without is an anchor is undefined error is thrown
+
+        // @ts-expect-error unknown type of ...[key]
+        instanceProps[key] = value;
+        // @ts-expect-error unknown type of ...[key]
+        delete scenario.props["key"];
       } else {
         // synchronizes changes between scenario.props and instanceProps
 
@@ -49,14 +51,6 @@
         // @ts-expect-error unknown type of ...[key]
         $effect(() => (scenario.props[key] = instanceProps[key]));
       }
-    });
-    Object.keys(slots).forEach((key) => {
-      // synchronizes changes between scenario.slots and instanceProps
-
-      // @ts-expect-error unknown type of ...[key]
-      $effect(() => (instanceProps[key] = slots[key]));
-      // @ts-expect-error unknown type of ...[key]
-      $effect(() => (slots[key] = instanceProps[key]));
     });
   }
 

@@ -1,20 +1,20 @@
-<script lang="ts" generics="C extends Component, S">
+<script lang="ts" generics="C extends Component">
   import { stringifyJSObj, unstringifyJSObj } from "$lib/StringifyJSObj.js";
   import type { Scenario } from "$lib/Preview.svelte";
   import type { Component } from "svelte";
 
   interface Props {
-    scenario: Scenario<C, S>;
-    onedit: (e: Scenario<C, S>) => void;
+    scenario: Scenario<C>;
+    onedit: (e: Scenario<C>) => void;
     onsetmaxsize: () => void;
   }
 
   let { scenario, onedit, onsetmaxsize }: Props = $props();
 
   function update(raw: string) {
-    let value: Scenario<C, S>;
+    let value: Scenario<C>;
     try {
-      value = unstringifyJSObj(raw) as Scenario<C, S>;
+      value = unstringifyJSObj(raw) as Scenario<C>;
       stringifyJSObj(value); // ensure value is stringifyable again
     } catch {
       return; // ignore errors

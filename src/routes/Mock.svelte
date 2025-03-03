@@ -7,6 +7,7 @@
     click: (c: string) => void;
     changeDateTime: (d: Date) => void;
     children?: Snippet;
+    custom?: Snippet<[string]>;
   }
 
   let {
@@ -15,6 +16,7 @@
     click,
     changeDateTime,
     children,
+    custom,
   }: Props = $props();
 
   let choices = ["blue", "red", "green"];
@@ -39,6 +41,7 @@
     }}
   />
   <div class="slot">{@render children?.()}</div>
+  <div class="custom">{@render custom?.(color)}</div>
 </div>
 
 <style>

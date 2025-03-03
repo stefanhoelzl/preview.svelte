@@ -26,26 +26,28 @@
 <Preview component={YourComponent} {scenarios} />
 ```
 
-Optionally it is also possible to test a slot 
-(currently no named slots are supported):
+Snippets can also be used
 ```svelte
 <script lang="ts">
   ...
-  type SlotData = { ... };
-  const scenarios: Scenarios<YourComponent, SlotData> = {
+  const scenarios: Scenarios<YourComponent> = {
     scenario1Name: {
-      props: {},
-      slotData: {...}
+      props: {children, named},
     },
     ...
   };
 </script>
 
-<Preview component={YourComponent} {scenarios}>
-  {#snippet children(slotData)}
-    {slotData}
-  {/snippet}
-</Preview>
+
+{#snippet children()}
+default children
+{/snippet}
+
+{#snippet named()}
+Hello, Snippet!
+{/snippet}
+
+<Preview component={YourComponent} {scenarios}></Preview>
 ```
 
 
